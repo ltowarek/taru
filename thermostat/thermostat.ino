@@ -37,6 +37,7 @@ hours_t night_end = 4;
 
 const unsigned int heater_pin = 13;
 const unsigned int one_wire_pin = 12;
+const unsigned int led_pin = 2;
 
 OneWire one_wire(one_wire_pin);
 DallasTemperature sensors(&one_wire);
@@ -71,6 +72,9 @@ void setup() {
 
   sensors.begin();
   pinMode(heater_pin, OUTPUT);
+  pinMode(led_pin, OUTPUT);
+
+  set_power_led();
 }
 
 bool connect_wifi() {
@@ -129,6 +133,10 @@ float get_parameter(const unsigned int field, const float default_value) {
 
 float read_field(const unsigned int field) {
   return ThingSpeak.readFloatField(channel_id, field, read_api_key);
+}
+
+void set_power_led() {
+  digitalWrite(led_pin, LOW);
 }
 
 void loop() {
