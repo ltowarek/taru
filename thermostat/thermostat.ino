@@ -191,6 +191,7 @@ bool set_current_time() {
       Serial.println("OK");
       break;
     }
+    delay(5000);
   }
   return success;
 }
