@@ -135,8 +135,8 @@ void loop() {
   if (!should_post_update()) return;
   last_update_time = millis();
 
-  if (!time_client.update()) {
-    Serial.println("Failed to update time!");
+  if (!set_current_time()) {
+    Serial.println("Failed to set current time!");
   }
   Serial.print("Current time [hh:mm:ss UTC]: ");
   Serial.println(time_client.getFormattedTime());
@@ -175,6 +175,24 @@ void loop() {
 
 bool should_post_update() {
   return millis() - last_update_time >= posting_interval;
+}
+
+bool set_current_time() {
+  bool success = false;
+  Serial.println("Updating time...");
+  for (unsigned int i = 1; i <= max_retries; ++i) {
+    Serial.print("Attempt [");
+    Serial.print(i);
+    Serial.print("/");
+    Serial.print(max_retries);
+    Serial.println("]");
+    if (time_client.update()) {
+      success = true;
+      Serial.println("OK");
+      break;
+    }
+  }
+  return success;
 }
 
 bool set_current_temperature() {
