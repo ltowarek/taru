@@ -88,6 +88,7 @@ bool connect_wifi() {
       Serial.print(max_retries);
       Serial.println("]");
 
+      WiFi.disconnect();
       WiFi.begin(ssid, password);
       delay(5000);
 
@@ -122,7 +123,7 @@ bool set_parameters() {
 float get_parameter(const unsigned int field, const float default_value) {
   float data = 0.0f;
   data = read_field(field);
-  if (data == 0) {
+  if (data == 0.0f) {
     Serial.print("Failed to read field ");
     Serial.print(field);
     Serial.println("! Leaving default value.");
@@ -132,7 +133,11 @@ float get_parameter(const unsigned int field, const float default_value) {
 }
 
 float read_field(const unsigned int field) {
-  return ThingSpeak.readFloatField(channel_id, field, read_api_key);
+  float data = ThingSpeak.readFloatField(channel_id, field, read_api_key);
+  if (ThingSpeak.getLastReadStatus() != OK_SUCCESS) {
+    data = 0.0f;
+  }
+  return data;
 }
 
 void set_power_led() {
