@@ -33,7 +33,7 @@ NTPClient time_client(ntp_udp);
 
 typedef int hours_t;
 hours_t night_start = 21;
-hours_t night_end = 4;
+hours_t night_end = 8;
 
 const unsigned int heater_pin = 13;
 const unsigned int one_wire_pin = 12;
