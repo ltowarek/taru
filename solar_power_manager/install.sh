@@ -15,3 +15,7 @@ sudo systemctl disable mosquitto
 sudo apt-get install -y python3 python3-pip python3-virtualenv
 python3 -m virtualenv -p python3 venv
 
+. venv/bin/activate
+pip install paho-mqtt
+deactivate
+
