@@ -10,6 +10,7 @@ rm mosquitto-repo.gpg.key
 sudo wget -O /etc/apt/sources.list.d/mosquitto-stretch.list http://repo.mosquitto.org/debian/mosquitto-stretch.list
 sudo apt-get update
 sudo apt-get install -y mosquitto
+sudo systemctl disable mosquitto
 
 sudo apt-get install -y python3 python3-venv
 python3 -m venv env
