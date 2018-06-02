@@ -12,6 +12,6 @@ sudo apt-get update
 sudo apt-get install -y mosquitto
 sudo systemctl disable mosquitto
 
-sudo apt-get install -y python3 python3-venv
-python3 -m venv env
+sudo apt-get install -y python3 python3-pip python3-virtualenv
+python3 -m virtualenv -p python3 venv
 
