@@ -1,4 +1,5 @@
-const int trigger_pin = D8;
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
 
 struct ResponseToken {
   const char name[100];
@@ -43,34 +44,23 @@ unsigned int current_byte_id = 0;
 unsigned int current_token_id = 0;
 String current_token_value = "";
 
-void setup() {
-  Serial.begin(2400);
-  pinMode(trigger_pin, INPUT);
-}
+const char *ssid = "";
+const char *password = "";
+const char *mqtt_server = "";
+const char *mqtt_client = "inverter_link";
+const char *mqtt_request_topic = "inverter/request";
+const char *mqtt_response_topic = "inverter/response";
+const char *mqtt_log_topic = "inverter/log";
 
-void loop() {
-  if (Serial.available()) {
-    char in = (char)Serial.read();
-    if (in == '(') {
-      current_byte_id = 0;
-      current_token_id = 0;
-      Serial.println();
-    } else {
-      if (current_byte_id == tokens[current_token_id].end) {
-        Serial.print(tokens[current_token_id].name);
-        Serial.print(": ");
-        Serial.println(current_token_value);
-        current_token_id++;
-      }
-      if (current_byte_id == tokens[current_token_id].start) {
-        current_token_value = "";
-      }
-      current_token_value += in;
-    }
-    current_byte_id++;
+WiFiClient wifi;
+PubSubClient mqtt(wifi);
+
+void callback(char *topic, byte *payload, unsigned int length) {
+  String command = "";
+  for (unsigned int i = 0; i < length; ++i) {
+    command += (char)payload[i];
   }
-
-  if (digitalRead(trigger_pin)) {
+  if (command == "QPIGS") {
     Serial.write(0x51);
     Serial.write(0x50);
     Serial.write(0x49);
@@ -79,7 +69,54 @@ void loop() {
     Serial.write(0xb7);
     Serial.write(0xa9);
     Serial.write(0x0d);
-    delay(1000);
+  }
+}
+
+void reconnect() {
+  while (!mqtt.connected()) {
+    if (mqtt.connect(mqtt_client)) {
+      mqtt.publish(mqtt_log_topic, "Connected to MQTT server");
+      mqtt.subscribe(mqtt_request_topic);
+    } else {
+      delay(5000);
+    }
+  }
+}
+
+void setup() {
+  Serial.begin(2400);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+  }
+  mqtt.setServer(mqtt_server, 1883);
+  mqtt.setCallback(callback);
+}
+
+void loop() {
+  if (!mqtt.connected()) {
+    reconnect();
+  }
+  mqtt.loop();
+  
+  if (Serial.available()) {
+    char in = (char)Serial.read();
+    if (in == '(') {
+      current_byte_id = 0;
+      current_token_id = 0;
+    } else {
+      if (current_byte_id == tokens[current_token_id].end) {
+        mqtt.publish(mqtt_log_topic, "Sending response");
+        String topic = mqtt_response_topic + String('/') + String(tokens[current_token_id].name);
+        mqtt.publish(topic.c_str(), current_token_value.c_str());
+        current_token_id++;
+      }
+      if (current_byte_id == tokens[current_token_id].start) {
+        current_token_value = "";
+      }
+      current_token_value += in;
+    }
+    current_byte_id++;
   }
 }
 
