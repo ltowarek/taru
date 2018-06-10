@@ -1,3 +1,3 @@
 #!/bin/sh
-mosquitto
+sudo systemctl start mosquitto
 
