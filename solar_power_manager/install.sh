@@ -19,3 +19,12 @@ python3 -m virtualenv -p python3 venv
 pip install -r requirements.txt
 deactivate
 
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get install -y apt-transport-https curl
+curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+echo "deb https://repos.influxdata.com/debian stretch stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+sudo apt-get update
+sudo apt-get install -y influxdb
+sudo systemctl disable influxdb
+
