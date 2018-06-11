@@ -19,6 +19,7 @@ class DatabaseLinkTest(unittest.TestCase):
 
         link = db_link.DatabaseLink()
         link.initialize()
+        link.subscribe(topic, measurement, int)
         link.loop_start()
 
         mqtt_client = mqtt.Client()

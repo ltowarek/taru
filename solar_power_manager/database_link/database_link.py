@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 
 import influxdb
-import paho.mqtt.client as mqtt
+import paho.mqtt.client
 import logging
 import os
 
-def on_message(client, user_data, message):
+def on_message(client, database_link, message):
     logging.debug('Payload: {}'.format(message.payload))
     logging.debug('Topic: {}'.format(message.topic))
-    user_data.save(os.path.basename(message.topic), int(message.payload))
+    database_link.save(message.topic, message.payload.decode())
 
 class DatabaseLink():
     def __init__(self):
         self.db_client = None
         self.mqtt_client = None
+        self.subscriptions = {}
         
     def initialize(self, host='localhost'):
         self.db_client = influxdb.InfluxDBClient(host)
@@ -24,10 +25,16 @@ class DatabaseLink():
             self.db_client.create_database(database_name)
         self.db_client.switch_database(database_name)
 
-        self.mqtt_client = mqtt.Client(userdata=self)
+        self.mqtt_client = paho.mqtt.client.Client(userdata=self)
         self.mqtt_client.on_message = on_message
         self.mqtt_client.connect(host)
-        self.mqtt_client.subscribe('inverter/test_measurement')
+
+    def subscribe(self, topic, measurement, type_converter):
+        self.subscriptions[topic] = {
+            'measurement': measurement,
+            'type': type_converter
+        }
+        self.mqtt_client.subscribe(topic)
         
     def close(self):
         self.db_client.close()
@@ -42,8 +49,14 @@ class DatabaseLink():
     def loop_stop(self):
         self.mqtt_client.loop_stop()
 
-    def save(self, measurement, value):
-        self.db_client.write_points([{'measurement': measurement, 'fields': {'value': value}}])
+    def save(self, topic, raw_value):
+        s = self.subscriptions[topic]
+        self.db_client.write_points([{
+            'measurement': s['measurement'],
+            'fields': {
+                'value': s['type'](raw_value)
+             }
+        }])
 
 
 if __name__ == '__main__':
