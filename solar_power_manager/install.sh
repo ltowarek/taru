@@ -28,3 +28,10 @@ sudo apt-get update
 sudo apt-get install -y influxdb
 sudo systemctl disable influxdb
 
+sudo apt-get install -y apt-transport-https curl
+curl https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
+echo "deb https://dl.bintray.com/fg2it/deb stretch main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+sudo apt-get update
+sudo apt-get install -y grafana
+sudo systemctl disable grafana-server
+
