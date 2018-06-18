@@ -37,6 +37,11 @@ class DatabaseLinkTest(unittest.TestCase):
         link.close()
         db_client.close()
 
+    def test_percent(self):
+        self.assertEqual(db_link.percent(100), 1.0)
+        self.assertEqual(db_link.percent(50), 0.5)
+        self.assertEqual(db_link.percent(0), 0.0)
+
 
 if __name__ == '__main__':
     unittest.main()
