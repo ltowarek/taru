@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 BASEDIR=$(cd `dirname $0` && pwd)
 CMD="* * * * * ${BASEDIR}/run.sh"
 crontab -l > current_cron
