@@ -1,4 +1,7 @@
 #!/bin/sh
 sudo systemctl start influxdb
-python database_link.py
+BASEDIR=$(cd `dirname $0` && pwd)
+. $BASEDIR/../venv/bin/activate
+python $BASEDIR/database_link.py
+deactivate
 
