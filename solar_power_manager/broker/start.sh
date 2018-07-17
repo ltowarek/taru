@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -ex
 echo "Starting broker"
 sudo systemctl start mosquitto
 echo "Broker started"

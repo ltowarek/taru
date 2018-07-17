@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -ex
 echo "Starting database link"
 BASEDIR=$(cd `dirname $0` && pwd)
 sudo systemctl start influxdb

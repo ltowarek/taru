@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -ex
 echo "Starting scheduler"
 BASEDIR=$(cd `dirname $0` && pwd)
 CMD="* * * * * ${BASEDIR}/run.sh"

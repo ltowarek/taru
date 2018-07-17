@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -ex
 
 mkdir -p logs
 broker/start.sh > logs/broker.log 2>&1;
