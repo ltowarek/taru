@@ -15,7 +15,7 @@ def initialize_logger():
     logger = get_logger()
     logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.handlers.TimedRotatingFileHandler('database_provider.log', interval='1H')
+    file_handler = logging.handlers.TimedRotatingFileHandler('database_provider.log', interval=5, when='m')
     file_handler.setLevel(logging.DEBUG)
 
     console_handler = logging.StreamHandler()
