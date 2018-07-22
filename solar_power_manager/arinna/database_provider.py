@@ -15,39 +15,39 @@ class DatabaseClient:
         self.db_client = None
 
     def initialize(self, host='localhost'):
-        logger.debug('Initializing database client')
+        logger.info('Initializing database client')
         self.db_client = influxdb.InfluxDBClient(host)
         databases = self.db_client.get_list_database()
         database_name = 'inverter'
         if database_name not in [d['name'] for d in databases]:
-            logger.debug('Database not found: {}'.format(database_name))
-            logger.debug('Creating new database: {}'.format(database_name))
+            logger.warning('Database not found: {}'.format(database_name))
+            logger.info('Creating new database: {}'.format(database_name))
             self.db_client.create_database(database_name)
         self.db_client.switch_database(database_name)
-        logger.debug('Database client initialized')
+        logger.info('Database client initialized')
 
     def close(self):
-        logger.debug('Closing database connection')
+        logger.info('Closing database connection')
         self.db_client.close()
-        logger.debug('Database connection closed')
+        logger.info('Database connection closed')
 
     def save(self, measurement, value):
-        logger.debug('Saving points into database')
-        logger.debug('Measurement: {}'.format(measurement))
-        logger.debug('Value: {}'.format(value))
+        logger.info('Saving points into database')
+        logger.info('Measurement: {}'.format(measurement))
+        logger.info('Value: {}'.format(value))
         self.db_client.write_points([{
             'measurement': measurement,
             'fields': {
                'value': value
             }
         }])
-        logger.debug('Points saved into database')
+        logger.info('Points saved into database')
 
 
 def on_message(_, subscriptions, message):
-    logger.debug('Message received')
-    logger.debug('Payload: {}'.format(message.payload))
-    logger.debug('Topic: {}'.format(message.topic))
+    logger.info('Message received')
+    logger.info('Payload: {}'.format(message.payload))
+    logger.info('Topic: {}'.format(message.topic))
     db_client = DatabaseClient()
     db_client.initialize()
     topic = message.topic
@@ -63,28 +63,28 @@ class MQTTClient:
         self.subscriptions = {}
 
     def initialize(self, host='localhost'):
-        logger.debug('Initializing MQTT client')
+        logger.info('Initializing MQTT client')
         self.mqtt_client = paho.mqtt.client.Client(userdata=self.subscriptions)
         self.mqtt_client.on_message = on_message
         self.mqtt_client.connect(host)
-        logger.debug('MQTT client initialized')
+        logger.info('MQTT client initialized')
 
     def subscribe(self, topic, measurement, type_converter):
-        logger.debug('Subscribing to new topic')
-        logger.debug('Topic: {}'.format(topic))
-        logger.debug('Measurement: {}'.format(measurement))
-        logger.debug('Type converter: {}'.format(type_converter))
+        logger.info('Subscribing to new topic')
+        logger.info('Topic: {}'.format(topic))
+        logger.info('Measurement: {}'.format(measurement))
+        logger.info('Type converter: {}'.format(type_converter))
         self.subscriptions[topic] = {
             'measurement': measurement,
             'type': type_converter
         }
         self.mqtt_client.subscribe(topic)
-        logger.debug('Subscribed to new topic')
+        logger.info('Subscribed to new topic')
 
     def close(self):
-        logger.debug('Disconnecting MQTT client')
+        logger.info('Disconnecting MQTT client')
         self.mqtt_client.disconnect()
-        logger.debug('MQTT client disconnected')
+        logger.info('MQTT client disconnected')
 
     def loop(self):
         logger.debug('MQTT client loop')
@@ -150,17 +150,17 @@ def run():
     mqtt_client.subscribe('inverter/response/is_switch_on', 'is_switch_on', bool)
     mqtt_client.subscribe('inverter/response/is_dustproof_installed', 'is_dustproof_installed', bool)
 
-    logger.debug('MQTT loop started')
+    logger.info('MQTT loop started')
     try:
         while True:
             mqtt_client.loop()
     except KeyboardInterrupt:
-        logger.debug('MQTT loop stopped by user')
+        logger.info('MQTT loop stopped by user')
     except Exception as e:
         logger.exception('Unknown exception occurred', e)
     finally:
         mqtt_client.close()
-    logger.debug('MQTT loop stopped')
+    logger.info('MQTT loop stopped')
 
     return 0
 
