@@ -2,6 +2,7 @@
 
 import paho.mqtt.client
 import logging
+import logging.handlers
 import sys
 
 
@@ -34,7 +35,7 @@ class Publisher:
 def setup_logging():
     logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.FileHandler('publisher.log')
+    file_handler = logging.handlers.RotatingFileHandler('scheduler.log', maxBytes=1000 * 1000, backupCount=1)
     file_handler.setLevel(logging.DEBUG)
 
     console_handler = logging.StreamHandler()

@@ -2,6 +2,7 @@
 
 import crontab
 import logging
+import logging.handlers
 import os
 import sys
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 def setup_logging():
     logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.FileHandler('scheduler.log')
+    file_handler = logging.handlers.RotatingFileHandler('scheduler.log', maxBytes=1000 * 1000, backupCount=1)
     file_handler.setLevel(logging.DEBUG)
 
     console_handler = logging.StreamHandler()
