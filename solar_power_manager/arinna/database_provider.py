@@ -112,7 +112,7 @@ def percent(value):
     return float(int(value)/100)
 
 
-def run():
+def main():
     setup_logging()
 
     mqtt_client = MQTTClient()
@@ -166,5 +166,5 @@ def run():
 
 
 if __name__ == '__main__':
-    sys.exit(run())
+    sys.exit(main())
 
