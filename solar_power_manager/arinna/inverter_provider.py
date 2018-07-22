@@ -3,18 +3,16 @@
 import paho.mqtt.client
 from collections import namedtuple
 import logging
+import logging.handlers
 import serial
 import sys
 
 
-def on_message(client, _, message):
-    logging.debug('Payload: {}'.format(message.payload))
-    logging.debug('Topic: {}'.format(message.topic))
-    qpigs = bytes.fromhex('51 50 49 47 53 b7 a9 0d')
-    with serial.Serial('/dev/serial0', 2400) as s:
-        s.write(qpigs)
+logger = logging.getLogger(__name__)
+
 
 ResponseToken = namedtuple('ResponseToken', ['name', 'start', 'end'])
+
 
 tokens = [
     ResponseToken('grid_voltage', 1, 6),
@@ -52,73 +50,107 @@ tokens = [
 
 def parse_response(raw_response):
     response = {}
-    current_byte_id = 0;
-    current_token_id = 0;
+    current_byte_id = 0
+    current_token_id = 0
     current_token_value = ''
 
+    logger.info('Parsing response')
     for b in raw_response:
         c = chr(b)
         if c == '(':
-            logging.debug('Resetting current byte and token ids')
+            logger.debug('Resetting current byte and token ids')
             current_byte_id = 0
             current_token_id = 0
         else:
             if current_token_id < len(tokens) and current_byte_id == tokens[current_token_id].end:
-                logging.debug('Saving response')
+                logger.debug('Updating response')
                 key = tokens[current_token_id].name
                 value = current_token_value
-                logging.debug('Key: {}'.format(key))
-                logging.debug('Value: {}'.format(value))
+                logger.debug('Key: {}'.format(key))
+                logger.debug('Value: {}'.format(value))
                 response[key] = value
                 current_token_id += 1
-                logging.debug('Increasing token id to: {}'.format(current_token_id))
+                logger.debug('Response updated')
+                logger.debug('Increasing token id to: {}'.format(current_token_id))
             if current_token_id < len(tokens) and current_byte_id == tokens[current_token_id].start:
                 logging.debug('Resetting current token value')
                 current_token_value = ''
             current_token_value = current_token_value + c
         current_byte_id += 1
+    logger.info('Response parsed')
 
     return response
 
 
 def publish_response(response, client):
     for key, value in response.items():
-        logging.debug('Sending response')
+        logger.info('Sending response')
         topic = 'inverter/response/' + key
-        logging.debug('Topic: {}'.format(topic))
-        logging.debug('Payload: {}'.format(value))
+        logger.info('Topic: {}'.format(topic))
+        logger.info('Payload: {}'.format(value))
         client.publish(topic, value)
 
 
-def run():
-    logging.basicConfig(level=logging.DEBUG)
+def on_message(_, serial_port, message):
+    logger.info('Message received')
+    logger.info('Payload: {}'.format(message.payload))
+    logger.info('Topic: {}'.format(message.topic))
+    qpigs = bytes.fromhex('51 50 49 47 53 b7 a9 0d')
+    with serial.Serial(serial_port, 2400) as s:
+        s.write(qpigs)
 
-    client = paho.mqtt.client.Client()
+
+def setup_logging():
+    logger.setLevel(logging.DEBUG)
+
+    file_handler = logging.handlers.TimedRotatingFileHandler('inverter_provider.log', interval=5, when='m')
+    file_handler.setLevel(logging.DEBUG)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
+
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+
+def main():
+    setup_logging()
+
+    serial_port = '/dev/serial0'
+    client = paho.mqtt.client.Client(userdata=serial_port)
     client.on_message = on_message
     client.connect('localhost')
     client.subscribe('inverter/request')
 
-
     try:
-        logging.debug('Starting MQTT loop')
+        logger.info('Starting MQTT loop')
         client.loop_start()
 
+        logger.info('Starting listening on port: {}'.format(serial_port))
         while True:
-            with serial.Serial('/dev/serial0', 2400) as s:
+            with serial.Serial(serial_port, 2400) as s:
                 raw_response = s.read_until(b'\r')
-                logging.debug('Raw response: {}'.format(raw_response))
+                logger.info('Raw response: {}'.format(raw_response))
 
                 parsed_response = parse_response(raw_response)
-                logging.debug('Parsed response: {}'.format(parsed_response))
+                logger.debug('Parsed response: {}'.format(parsed_response))
 
                 publish_response(parsed_response, client)
     except KeyboardInterrupt:
+        logger.info('Listening loop stopped by user')
+    except Exception as e:
+        logger.exception('Unknown exception occurred', e)
+    finally:
         client.loop_stop()
         client.disconnect()
+    logger.info('Listening loop stopped')
 
     return 0
 
 
 if __name__ == '__main__':
-    sys.exit(run())
-
+    sys.exit(main())
