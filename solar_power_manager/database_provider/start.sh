@@ -1,11 +1,11 @@
 #!/bin/sh
 set -ex
-echo "Starting database link"
+echo "Starting database provider"
 BASEDIR=$(cd `dirname $0` && pwd)
 sudo systemctl start influxdb
 sleep 10s
 . $BASEDIR/../venv/bin/activate
-python $BASEDIR/database_link.py
+python $BASEDIR/../arinna/database_provider.py
 deactivate
-echo "Database link started"
+echo "Database provider started"
 
