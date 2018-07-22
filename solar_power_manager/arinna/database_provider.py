@@ -7,12 +7,91 @@ import logging.handlers
 import sys
 
 
-def get_logger():
-    return logging.getLogger('database_provider')
+logger = logging.getLogger(__name__)
 
 
-def initialize_logger():
-    logger = get_logger()
+class DatabaseClient:
+    def __init__(self):
+        self.db_client = None
+
+    def initialize(self, host='localhost'):
+        logger.debug('Initializing database client')
+        self.db_client = influxdb.InfluxDBClient(host)
+        databases = self.db_client.get_list_database()
+        database_name = 'inverter'
+        if database_name not in [d['name'] for d in databases]:
+            logger.debug('Database not found: {}'.format(database_name))
+            logger.debug('Creating new database: {}'.format(database_name))
+            self.db_client.create_database(database_name)
+        self.db_client.switch_database(database_name)
+        logger.debug('Database client initialized')
+
+    def close(self):
+        logger.debug('Closing database connection')
+        self.db_client.close()
+        logger.debug('Database connection closed')
+
+    def save(self, measurement, value):
+        logger.debug('Saving points into database')
+        logger.debug('Measurement: {}'.format(measurement))
+        logger.debug('Value: {}'.format(value))
+        self.db_client.write_points([{
+            'measurement': measurement,
+            'fields': {
+               'value': value
+            }
+        }])
+        logger.debug('Points saved into database')
+
+
+def on_message(_, subscriptions, message):
+    logger.debug('Message received')
+    logger.debug('Payload: {}'.format(message.payload))
+    logger.debug('Topic: {}'.format(message.topic))
+    db_client = DatabaseClient()
+    db_client.initialize()
+    topic = message.topic
+    subscription = subscriptions[topic]
+    raw_value = message.payload.decode().replace(',', '.')
+    db_client.save(subscription['measurement'], subscription['type'](raw_value))
+    db_client.close()
+
+
+class MQTTClient:
+    def __init__(self):
+        self.mqtt_client = None
+        self.subscriptions = {}
+
+    def initialize(self, host='localhost'):
+        logger.debug('Initializing MQTT client')
+        self.mqtt_client = paho.mqtt.client.Client(userdata=self.subscriptions)
+        self.mqtt_client.on_message = on_message
+        self.mqtt_client.connect(host)
+        logger.debug('MQTT client initialized')
+
+    def subscribe(self, topic, measurement, type_converter):
+        logger.debug('Subscribing to new topic')
+        logger.debug('Topic: {}'.format(topic))
+        logger.debug('Measurement: {}'.format(measurement))
+        logger.debug('Type converter: {}'.format(type_converter))
+        self.subscriptions[topic] = {
+            'measurement': measurement,
+            'type': type_converter
+        }
+        self.mqtt_client.subscribe(topic)
+        logger.debug('Subscribed to new topic')
+
+    def close(self):
+        logger.debug('Disconnecting MQTT client')
+        self.mqtt_client.disconnect()
+        logger.debug('MQTT client disconnected')
+
+    def loop(self):
+        logger.debug('MQTT client loop')
+        self.mqtt_client.loop()
+
+
+def setup_logging():
     logger.setLevel(logging.DEBUG)
 
     file_handler = logging.handlers.TimedRotatingFileHandler('database_provider.log', interval=5, when='m')
@@ -29,93 +108,12 @@ def initialize_logger():
     logger.addHandler(console_handler)
 
 
-class DatabaseClient:
-    def __init__(self):
-        self.db_client = None
-
-    def initialize(self, host='localhost'):
-        get_logger().debug('Initializing database client')
-        self.db_client = influxdb.InfluxDBClient(host)
-        databases = self.db_client.get_list_database()
-        database_name = 'inverter'
-        if database_name not in [d['name'] for d in databases]:
-            get_logger().debug('Database not found: {}'.format(database_name))
-            get_logger().debug('Creating new database: {}'.format(database_name))
-            self.db_client.create_database(database_name)
-        self.db_client.switch_database(database_name)
-        get_logger().debug('Database client initialized')
-
-    def close(self):
-        get_logger().debug('Closing database connection')
-        self.db_client.close()
-        get_logger().debug('Database connection closed')
-
-    def save(self, measurement, value):
-        get_logger().debug('Saving points into database')
-        get_logger().debug('Measurement: {}'.format(measurement))
-        get_logger().debug('Value: {}'.format(value))
-        self.db_client.write_points([{
-            'measurement': measurement,
-            'fields': {
-               'value': value
-            }
-        }])
-        get_logger().debug('Points saved into database')
-
-
-def on_message(_, subscriptions, message):
-    get_logger().debug('Message received')
-    get_logger().debug('Payload: {}'.format(message.payload))
-    get_logger().debug('Topic: {}'.format(message.topic))
-    db_client = DatabaseClient()
-    db_client.initialize()
-    topic = message.topic
-    subscription = subscriptions[topic]
-    raw_value = message.payload.decode().replace(',', '.')
-    db_client.save(subscription['measurement'], subscription['type'](raw_value))
-    db_client.close()
-
-
-class MQTTClient:
-    def __init__(self):
-        self.mqtt_client = None
-        self.subscriptions = {}
-
-    def initialize(self, host='localhost'):
-        get_logger().debug('Initializing MQTT client')
-        self.mqtt_client = paho.mqtt.client.Client(userdata=self.subscriptions)
-        self.mqtt_client.on_message = on_message
-        self.mqtt_client.connect(host)
-        get_logger().debug('MQTT client initialized')
-
-    def subscribe(self, topic, measurement, type_converter):
-        get_logger().debug('Subscribing to new topic')
-        get_logger().debug('Topic: {}'.format(topic))
-        get_logger().debug('Measurement: {}'.format(measurement))
-        get_logger().debug('Type converter: {}'.format(type_converter))
-        self.subscriptions[topic] = {
-            'measurement': measurement,
-            'type': type_converter
-        }
-        self.mqtt_client.subscribe(topic)
-        get_logger().debug('Subscribed to new topic')
-
-    def close(self):
-        get_logger().debug('Disconnecting MQTT client')
-        self.mqtt_client.disconnect()
-        get_logger().debug('MQTT client disconnected')
-
-    def loop(self):
-        get_logger().debug('MQTT client loop')
-        self.mqtt_client.loop()
-
-
 def percent(value):
     return float(int(value)/100)
 
 
 def run():
-    initialize_logger()
+    setup_logging()
 
     mqtt_client = MQTTClient()
     mqtt_client.initialize()
@@ -152,17 +150,17 @@ def run():
     mqtt_client.subscribe('inverter/response/is_switch_on', 'is_switch_on', bool)
     mqtt_client.subscribe('inverter/response/is_dustproof_installed', 'is_dustproof_installed', bool)
 
-    get_logger().debug('MQTT loop started')
+    logger.debug('MQTT loop started')
     try:
         while True:
             mqtt_client.loop()
     except KeyboardInterrupt:
-        get_logger().debug('MQTT loop stopped by user')
+        logger.debug('MQTT loop stopped by user')
     except Exception as e:
-        get_logger().exception('Unknown exception occurred', e)
+        logger.exception('Unknown exception occurred', e)
     finally:
         mqtt_client.close()
-    get_logger().debug('MQTT loop stopped')
+    logger.debug('MQTT loop stopped')
 
     return 0
 
