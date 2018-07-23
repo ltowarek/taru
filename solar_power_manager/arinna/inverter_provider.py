@@ -6,6 +6,7 @@ import logging
 import logging.handlers
 import serial
 import sys
+import arinna.config as config
 
 
 logger = logging.getLogger(__name__)
@@ -103,7 +104,8 @@ def on_message(_, serial_port, message):
 def setup_logging():
     logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.handlers.TimedRotatingFileHandler('inverter_provider.log', interval=5, when='m')
+    file_handler = logging.handlers.TimedRotatingFileHandler(config.get_log_path('inverter_provider'),
+                                                             interval=5, when='m')
     file_handler.setLevel(logging.DEBUG)
 
     console_handler = logging.StreamHandler()

@@ -5,6 +5,7 @@ import paho.mqtt.client
 import logging
 import logging.handlers
 import sys
+import arinna.config as config
 
 
 logger = logging.getLogger(__name__)
@@ -98,7 +99,8 @@ class MQTTClient:
 def setup_logging():
     logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.handlers.TimedRotatingFileHandler('database_provider.log', interval=5, when='m')
+    file_handler = logging.handlers.TimedRotatingFileHandler(config.get_log_path('database_provider'),
+                                                             interval=5, when='m')
     file_handler.setLevel(logging.DEBUG)
 
     console_handler = logging.StreamHandler()

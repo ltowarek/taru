@@ -4,6 +4,7 @@ import paho.mqtt.client
 import logging
 import logging.handlers
 import sys
+import arinna.config as config
 
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,8 @@ class Publisher:
 def setup_logging():
     logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.handlers.RotatingFileHandler('scheduler.log', maxBytes=1000 * 1000, backupCount=1)
+    file_handler = logging.handlers.RotatingFileHandler(config.get_log_path('publisher'),
+                                                        maxBytes=1000 * 1000, backupCount=1)
     file_handler.setLevel(logging.DEBUG)
 
     console_handler = logging.StreamHandler()
