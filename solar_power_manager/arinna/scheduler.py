@@ -35,7 +35,7 @@ def main():
     logger.debug('Current crontab: {}'.format(cron))
 
     script_directory = os.path.dirname(os.path.abspath(__file__))
-    command = os.path.join(script_directory, '../publisher/run.sh')
+    command = os.path.join(script_directory, '../scheduler/run.sh')
     logger.info('Command: {}'.format(command))
 
     for _ in cron.find_command(command):
