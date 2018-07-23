@@ -90,6 +90,10 @@ class MQTTClient:
         logger.debug('MQTT client loop')
         self.mqtt_client.loop()
 
+    def loop_forever(self):
+        logger.debug('Starting infinite MQTT client loop')
+        self.mqtt_client.loop_forever()
+
 
 def setup_logging():
     logger.setLevel(logging.DEBUG)
@@ -152,8 +156,7 @@ def main():
 
     logger.info('MQTT loop started')
     try:
-        while True:
-            mqtt_client.loop()
+        mqtt_client.loop_forever()
     except KeyboardInterrupt:
         logger.info('MQTT loop stopped by user')
     except Exception as e:
