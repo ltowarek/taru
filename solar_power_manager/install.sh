@@ -35,3 +35,4 @@ sudo apt-get update
 sudo apt-get install -y grafana
 sudo systemctl disable grafana-server
 
+mkdir -p logs
