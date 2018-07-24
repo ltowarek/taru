@@ -4,7 +4,7 @@ import os
 
 
 def get_root_directory():
-    default_path = os.path.abspath(os.path.join(__file__, '..'))
+    default_path = os.path.abspath(os.path.join(__file__, '../..'))
     return os.environ.get('ARINNA_ROOT', default_path)
 
 
