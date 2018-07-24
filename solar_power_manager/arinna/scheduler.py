@@ -40,7 +40,7 @@ def main():
     command = os.path.join(script_directory, '../scheduler/run.sh')
     logger.info('Command: {}'.format(command))
 
-    for _ in cron.find_command(command):
+    if list(cron.find_command(command)):
         logger.info('Job already exists')
     else:
         logger.info('Job not found')
