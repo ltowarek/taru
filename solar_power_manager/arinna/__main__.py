@@ -30,15 +30,15 @@ class ArinnaApplication:
         ))
         logger.info('Inverter provider started')
 
-        logger.info('Starting scheduler')
+        logger.info('Registering scheduler')
         self.processes.append(self.run_process(
-            'python {}'.format(os.path.normpath(os.path.join(root_directory, 'arinna/scheduler.py'))),
+            'python {} register'.format(os.path.normpath(os.path.join(root_directory, 'arinna/scheduler.py'))),
         ))
-        logger.info('Scheduler started')
+        logger.info('Scheduler registered')
 
     def run_process(self, command):
         logger.debug('Command: {}'.format(command))
-        process = subprocess.Popen(command, shell=True)
+        process = subprocess.Popen('exec {}'.format(command), shell=True)
         logger.debug('PID: {}'.format(process.pid))
         return process
 
@@ -58,6 +58,13 @@ class ArinnaApplication:
         for p in self.processes:
             p.terminate()
         logger.info('Processes stopped')
+
+        logger.info('Unregistering scheduler')
+        root_directory = config.get_root_directory()
+        self.processes.append(self.run_process(
+            'python {} unregister'.format(os.path.normpath(os.path.join(root_directory, 'arinna/scheduler.py'))),
+        ))
+        logger.info('Scheduler unregistered')
 
 
 def setup_logging():
