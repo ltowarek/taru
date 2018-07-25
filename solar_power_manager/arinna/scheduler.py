@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def get_command_line():
     script_directory = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(script_directory, '../scheduler/run.sh')
+    return os.path.join(script_directory, '../scripts/publish.sh')
 
 
 def register():
