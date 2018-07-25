@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 class ArinnaApplication:
     def __init__(self):
         self.processes = []
-        signal.signal(signal.SIGTERM, self.stop)
 
     def start(self):
         root_directory = config.get_root_directory()
@@ -76,6 +75,7 @@ def setup_logging():
 def main():
     setup_logging()
     app = ArinnaApplication()
+    signal.signal(signal.SIGTERM, app.stop)
     app.start()
     app.wait()
     return 0
