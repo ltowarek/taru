@@ -1,0 +1,14 @@
+[Unit]
+Description=Arinna service
+After=network.target
+Wants=influxdb.service mosquitto.service grafana-server.service
+
+[Service]
+ExecStart=/usr/bin/python3 -m arinna
+Environment=ARINNA_ROOT=/home/developer/workspace/taru/solar_power_manager
+Environment=PYTHONPATH=/home/developer/workspace/taru/solar_power_manager
+WorkingDirectory=/home/developer/workspace/taru/solar_power_manager
+User=developer
+
+[Install]
+WantedBy=multi-user.target
