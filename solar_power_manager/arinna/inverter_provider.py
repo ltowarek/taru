@@ -92,6 +92,10 @@ def publish_response(response, client):
         client.publish(topic, value)
 
 
+def is_valid_response(response):
+    return response != 'ACK9 \r' and response != 'NAKss\r'
+
+
 def on_message(_, serial_port, message):
     logger.info('Message received')
     logger.info('Payload: {}'.format(message.payload))
@@ -137,6 +141,10 @@ def main():
             with serial.Serial(serial_port, 2400) as s:
                 raw_response = s.read_until(b'\r')
                 logger.info('Raw response: {}'.format(raw_response))
+
+                if not is_valid_response(raw_response):
+                    logger.warning('Invalid response')
+                    continue
 
                 parsed_response = parse_response(raw_response)
                 logger.debug('Parsed response: {}'.format(parsed_response))
