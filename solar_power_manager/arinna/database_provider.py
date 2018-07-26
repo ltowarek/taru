@@ -118,6 +118,10 @@ def percent(value):
     return float(int(value)/100)
 
 
+def bool_from_string(value):
+    return True if bool(int(value)) else False
+
+
 def main():
     setup_logging()
 
@@ -140,21 +144,21 @@ def main():
     mqtt_client.subscribe('inverter/response/pv_input_voltage', 'pv_input_voltage', float)
     mqtt_client.subscribe('inverter/response/battery_voltage_from_scc', 'battery_voltage_from_scc', float)
     mqtt_client.subscribe('inverter/response/battery_discharge_current', 'battery_discharge_current', int)
-    mqtt_client.subscribe('inverter/response/is_sbu_priority_version_added', 'is_sbu_priority_version_added', bool)
-    mqtt_client.subscribe('inverter/response/is_sbu_priority_version_added', 'is_sbu_priority_version_added', bool)
-    mqtt_client.subscribe('inverter/response/is_configuration_changed', 'is_configuration_changed', bool)
-    mqtt_client.subscribe('inverter/response/is_scc_firmware_updated', 'is_scc_firmware_updated', bool)
-    mqtt_client.subscribe('inverter/response/is_load_on', 'is_load_on', bool)
-    mqtt_client.subscribe('inverter/response/is_battery_voltage_to_steady_while_charging', 'is_battery_voltage_to_steady_while_charging', bool)
-    mqtt_client.subscribe('inverter/response/is_charging_on', 'is_charging_on', bool)
-    mqtt_client.subscribe('inverter/response/is_scc_charging_on', 'is_scc_charging_on', bool)
-    mqtt_client.subscribe('inverter/response/is_ac_charging_on', 'is_ac_charging_on', bool)
+    mqtt_client.subscribe('inverter/response/is_sbu_priority_version_added', 'is_sbu_priority_version_added', bool_from_string)
+    mqtt_client.subscribe('inverter/response/is_sbu_priority_version_added', 'is_sbu_priority_version_added', bool_from_string)
+    mqtt_client.subscribe('inverter/response/is_configuration_changed', 'is_configuration_changed', bool_from_string)
+    mqtt_client.subscribe('inverter/response/is_scc_firmware_updated', 'is_scc_firmware_updated', bool_from_string)
+    mqtt_client.subscribe('inverter/response/is_load_on', 'is_load_on', bool_from_string)
+    mqtt_client.subscribe('inverter/response/is_battery_voltage_to_steady_while_charging', 'is_battery_voltage_to_steady_while_charging', bool_from_string)
+    mqtt_client.subscribe('inverter/response/is_charging_on', 'is_charging_on', bool_from_string)
+    mqtt_client.subscribe('inverter/response/is_scc_charging_on', 'is_scc_charging_on', bool_from_string)
+    mqtt_client.subscribe('inverter/response/is_ac_charging_on', 'is_ac_charging_on', bool_from_string)
     mqtt_client.subscribe('inverter/response/battery_voltage_offset_for_fans_on', 'battery_voltage_offset_for_fans_on', int)
     mqtt_client.subscribe('inverter/response/eeprom_version', 'eeprom_version', int)
     mqtt_client.subscribe('inverter/response/pv_charging_power', 'pv_charging_power', int)
-    mqtt_client.subscribe('inverter/response/is_charging_to_floating_enabled', 'is_charging_to_floating_enabled', bool)
-    mqtt_client.subscribe('inverter/response/is_switch_on', 'is_switch_on', bool)
-    mqtt_client.subscribe('inverter/response/is_dustproof_installed', 'is_dustproof_installed', bool)
+    mqtt_client.subscribe('inverter/response/is_charging_to_floating_enabled', 'is_charging_to_floating_enabled', bool_from_string)
+    mqtt_client.subscribe('inverter/response/is_switch_on', 'is_switch_on', bool_from_string)
+    mqtt_client.subscribe('inverter/response/is_dustproof_installed', 'is_dustproof_installed', bool_from_string)
 
     logger.info('MQTT loop started')
     try:
