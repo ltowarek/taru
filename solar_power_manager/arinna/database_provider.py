@@ -100,7 +100,7 @@ def setup_logging():
     logger.setLevel(logging.DEBUG)
 
     file_handler = logging.handlers.TimedRotatingFileHandler(config.get_log_path('database_provider'),
-                                                             interval=5, when='m')
+                                                             interval=5, when='m', backupCount=1)
     file_handler.setLevel(logging.DEBUG)
 
     console_handler = logging.StreamHandler()
