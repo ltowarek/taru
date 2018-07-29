@@ -93,7 +93,7 @@ def publish_response(response, client):
 
 
 def is_valid_response(response):
-    return response != 'ACK9 \r' and response != 'NAKss\r'
+    return response != b'(ACK9 \r' and response != b'(NAKss\r'
 
 
 def on_message(_, serial_port, message):
