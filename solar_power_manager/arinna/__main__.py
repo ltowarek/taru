@@ -16,24 +16,16 @@ class ArinnaApplication:
         self.processes = []
 
     def start(self):
-        root_directory = config.get_root_directory()
-
         logger.info('Starting database provider')
-        self.processes.append(self.run_process(
-            'python {}'.format(os.path.normpath(os.path.join(root_directory, 'arinna/database_provider.py'))),
-        ))
+        self.processes.append(self.run_process('arinna-database'))
         logger.info('Database provider started')
 
         logger.info('Starting inverter provider')
-        self.processes.append(self.run_process(
-            'python {}'.format(os.path.normpath(os.path.join(root_directory, 'arinna/inverter_provider.py'))),
-        ))
+        self.processes.append(self.run_process('arinna-inverter'))
         logger.info('Inverter provider started')
 
         logger.info('Registering scheduler')
-        self.processes.append(self.run_process(
-            'python {} register'.format(os.path.normpath(os.path.join(root_directory, 'arinna/scheduler.py'))),
-        ))
+        self.processes.append(self.run_process('arinna-scheduler register'))
         logger.info('Scheduler registered')
 
     def run_process(self, command):
@@ -60,10 +52,7 @@ class ArinnaApplication:
         logger.info('Processes stopped')
 
         logger.info('Unregistering scheduler')
-        root_directory = config.get_root_directory()
-        self.processes.append(self.run_process(
-            'python {} unregister'.format(os.path.normpath(os.path.join(root_directory, 'arinna/scheduler.py'))),
-        ))
+        self.processes.append(self.run_process('arinna-scheduler unregister'))
         logger.info('Scheduler unregistered')
 
 
