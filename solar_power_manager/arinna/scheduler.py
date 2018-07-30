@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_command_line():
-    script_directory = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(script_directory, '../scripts/publish.sh')
+    return 'arinna-publisher'
 
 
 def register():
@@ -57,10 +56,10 @@ def unregister():
         logger.info('Job removed')
 
 
-def setup_logging():
+def setup_logging(logs_directory):
     logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.handlers.RotatingFileHandler(config.get_log_path('scheduler'),
+    file_handler = logging.handlers.RotatingFileHandler(os.path.join(logs_directory, 'scheduler.log'),
                                                         maxBytes=1000 * 1000, backupCount=1)
     file_handler.setLevel(logging.DEBUG)
 
@@ -89,7 +88,8 @@ def process_command_line():
 
 def main():
     args = process_command_line()
-    setup_logging()
+    settings = config.load()
+    setup_logging(settings.logs_directory)
     actions[args.action]()
     return 0
 

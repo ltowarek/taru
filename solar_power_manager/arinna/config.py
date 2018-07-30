@@ -1,16 +1,45 @@
 #!/usr/bin/env python3
 
 import os
+import sys
+import yaml
 
 
-def get_root_directory():
-    default_path = os.path.abspath(os.path.join(__file__, '../..'))
-    return os.environ.get('ARINNA_ROOT', default_path)
+class Config:
+    def __init__(self):
+        self.settings = {
+            'logs_directory': '',
+            'serial_port': '',
+        }
+
+    def from_yaml(self, path):
+        with open(path) as f:
+            self.settings.update(yaml.safe_load(f))
+
+    def __getattr__(self, name):
+        return self.settings[name]
+
+    def __str__(self):
+        return str(self.settings)
 
 
-def get_logs_directory():
-    return os.path.join(get_root_directory(), 'logs')
+def load():
+    config = Config()
+    path = config_path()
+    if os.path.exists(path):
+        config.from_yaml(config_path())
+    return config
 
 
-def get_log_path(file_name):
-    return os.path.join(get_logs_directory(), file_name + '.log')
+def config_path():
+    return os.environ.get('ARINNA_CONFIG', '/etc/arinna/config.yaml')
+
+
+def main():
+    print('Config path: {}'.format(config_path()))
+    print('Config:\n{}'.format(load()))
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

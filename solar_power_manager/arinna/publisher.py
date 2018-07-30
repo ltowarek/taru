@@ -3,6 +3,7 @@
 import paho.mqtt.client
 import logging
 import logging.handlers
+import os
 import sys
 import arinna.config as config
 
@@ -33,10 +34,10 @@ class Publisher:
         logger.info('Message published')
 
 
-def setup_logging():
+def setup_logging(logs_directory):
     logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.handlers.RotatingFileHandler(config.get_log_path('publisher'),
+    file_handler = logging.handlers.RotatingFileHandler(os.path.join(logs_directory, 'publisher.log'),
                                                         maxBytes=1000 * 1000, backupCount=1)
     file_handler.setLevel(logging.DEBUG)
 
@@ -52,7 +53,8 @@ def setup_logging():
 
 
 def main():
-    setup_logging()
+    settings = config.load()
+    setup_logging(settings.logs_directory)
 
     publisher = Publisher()
     publisher.initialize()

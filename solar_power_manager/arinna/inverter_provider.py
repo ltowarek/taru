@@ -4,6 +4,7 @@ import paho.mqtt.client
 from collections import namedtuple
 import logging
 import logging.handlers
+import os
 import serial
 import sys
 import arinna.config as config
@@ -105,10 +106,10 @@ def on_message(_, serial_port, message):
         s.write(qpigs)
 
 
-def setup_logging():
+def setup_logging(logs_directory):
     logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.handlers.TimedRotatingFileHandler(config.get_log_path('inverter_provider'),
+    file_handler = logging.handlers.TimedRotatingFileHandler(os.path.join(logs_directory, 'inverter_provider.log'),
                                                              interval=5, when='m', backupCount=1)
     file_handler.setLevel(logging.DEBUG)
 
@@ -124,10 +125,10 @@ def setup_logging():
 
 
 def main():
-    setup_logging()
+    settings = config.load()
+    setup_logging(settings.logs_directory)
 
-    serial_port = '/dev/serial0'
-    client = paho.mqtt.client.Client(userdata=serial_port)
+    client = paho.mqtt.client.Client(userdata=settings.serial_port)
     client.on_message = on_message
     client.connect('localhost')
     client.subscribe('inverter/request')
@@ -136,9 +137,9 @@ def main():
         logger.info('Starting MQTT loop')
         client.loop_start()
 
-        logger.info('Starting listening on port: {}'.format(serial_port))
+        logger.info('Starting listening on port: {}'.format(settings.serial_port))
         while True:
-            with serial.Serial(serial_port, 2400) as s:
+            with serial.Serial(settings.serial_port, 2400) as s:
                 raw_response = s.read_until(b'\r')
                 logger.info('Raw response: {}'.format(raw_response))
 

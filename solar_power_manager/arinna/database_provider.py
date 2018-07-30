@@ -4,6 +4,7 @@ import influxdb
 import paho.mqtt.client
 import logging
 import logging.handlers
+import os
 import sys
 import arinna.config as config
 
@@ -96,10 +97,10 @@ class MQTTClient:
         self.mqtt_client.loop_forever()
 
 
-def setup_logging():
+def setup_logging(logs_directory):
     logger.setLevel(logging.DEBUG)
 
-    file_handler = logging.handlers.TimedRotatingFileHandler(config.get_log_path('database_provider'),
+    file_handler = logging.handlers.TimedRotatingFileHandler(os.path.join(logs_directory, 'database_provider.log'),
                                                              interval=5, when='m', backupCount=1)
     file_handler.setLevel(logging.DEBUG)
 
@@ -123,7 +124,8 @@ def bool_from_string(value):
 
 
 def main():
-    setup_logging()
+    settings = config.load()
+    setup_logging(settings.logs_directory)
 
     mqtt_client = MQTTClient()
     mqtt_client.initialize()
