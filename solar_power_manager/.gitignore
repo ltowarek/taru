@@ -107,4 +107,4 @@ venv.bak/
 
 logs/
 .log
-
+version.py
