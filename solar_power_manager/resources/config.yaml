@@ -1,3 +1,0 @@
----
-logs_directory: /var/log/arinna
-serial_port: /dev/ttyS0
