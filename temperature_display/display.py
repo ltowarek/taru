@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from RPLCD.i2c import CharLCD
 
 if __name__ == '__main__':
