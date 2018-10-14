@@ -1,0 +1,10 @@
+[Unit]
+Description=Taru temperature display service
+Wants=mosquitto.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/pi/workspace/taru/temperature_display/display.py
+
+[Install]
+WantedBy=multi-user.target
