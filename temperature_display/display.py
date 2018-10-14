@@ -38,4 +38,4 @@ if __name__ == '__main__':
     temperature_inside = 20.4
     with LCD() as lcd:
         lcd.print_outside_temperature(temperature_outside)
-        lcd.print_outside_temperature(temperature_inside)
+        lcd.print_inside_temperature(temperature_inside)
