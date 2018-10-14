@@ -25,8 +25,8 @@ if __name__ == '__main__':
     calibration_params = bme280.load_calibration_params(bus, SENSOR_ADDRESS)
 
     data = bme280.sample(bus, SENSOR_ADDRESS, calibration_params)
-    mqtt.publish(MQTT_TEMPERATURE_TOPIC, data.temperature)
-    mqtt.publish(MQTT_PRESSURE_TOPIC, data.pressure)
-    mqtt.publish(MQTT_HUMIDITY_TOPIC, data.humidity)
+    mqtt.publish(MQTT_TEMPERATURE_TOPIC, '{:.2f}'.format(data.temperature))
+    mqtt.publish(MQTT_PRESSURE_TOPIC, str(data.pressure))
+    mqtt.publish(MQTT_HUMIDITY_TOPIC, str(data.humidity))
 
     mqtt.disconnect()
