@@ -6,4 +6,4 @@ if __name__ == '__main__':
     lcd = CharLCD('PCF8574', 0x27)
     lcd.write_string(f'Out: {temperature_outside}\u2103\n'
                      f'In: {temperature_inside}\u2103')
-    lcd.close()
+    lcd.close(clear=True)
