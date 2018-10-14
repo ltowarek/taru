@@ -1,0 +1,10 @@
+[Unit]
+Description=Taru RPI thermometer service
+Wants=mosquitto.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/pi/workspace/taru/thermometer_rpi/thermometer_rpi.py
+
+[Install]
+WantedBy=multi-user.target
