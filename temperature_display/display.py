@@ -4,6 +4,8 @@ from RPLCD.i2c import CharLCD
 
 
 class LCD:
+    DEGREE_SYMBOL = chr(223)
+
     def __init__(self):
         self.lcd = None
 
@@ -13,12 +15,15 @@ class LCD:
     def close(self):
         self.lcd.close(clear=True)
 
-    def print_temperature(self, outside, inside):
-        degree_symbol = chr(223)
+    def print_outside_temperature(self, temperature):
+        self.lcd.cursor_pos(0, 0)
         self.lcd.write_string(
-            'Out: {0}{2}C\n\rIn: {1}{2}C'.format(outside,
-                                                 inside,
-                                                 degree_symbol))
+            'Out: {}{}C'.format(temperature, self.DEGREE_SYMBOL))
+
+    def print_inside_temperature(self, temperature):
+        self.lcd.cursor_pos(1, 0)
+        self.lcd.write_string(
+            'In: {}{}C'.format(temperature, self.DEGREE_SYMBOL))
 
     def __enter__(self):
         self.open()
@@ -32,5 +37,5 @@ if __name__ == '__main__':
     temperature_outside = 10.5
     temperature_inside = 20.4
     with LCD() as lcd:
-        lcd.print_temperature(temperature_outside, temperature_inside)
-
+        lcd.print_outside_temperature(temperature_outside)
+        lcd.print_outside_temperature(temperature_inside)
