@@ -20,6 +20,7 @@ if __name__ == '__main__':
     mqtt = Client(client_id=MQTT_CLIENT)
     mqtt.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
     mqtt.connect(MQTT_SERVER)
+    mqtt.loop_start()
 
     bus = smbus.SMBus(SENSOR_PORT)
     calibration_params = bme280.load_calibration_params(bus, SENSOR_ADDRESS)
@@ -29,4 +30,5 @@ if __name__ == '__main__':
     mqtt.publish(MQTT_PRESSURE_TOPIC, '{:.2f}'.format(data.pressure))
     mqtt.publish(MQTT_HUMIDITY_TOPIC, '{:.2f}'.format(data.humidity))
 
+    mqtt.loop_stop()
     mqtt.disconnect()
