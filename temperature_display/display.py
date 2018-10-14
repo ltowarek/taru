@@ -31,7 +31,6 @@ class LCD:
 if __name__ == '__main__':
     temperature_outside = 10.5
     temperature_inside = 20.4
-    lcd = LCD()
-    with lcd:
+    with LCD() as lcd:
         lcd.print_temperature(temperature_outside, temperature_inside)
 
