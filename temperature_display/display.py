@@ -16,12 +16,12 @@ class LCD:
         self.lcd.close(clear=True)
 
     def print_outside_temperature(self, temperature):
-        self.lcd.cursor_pos(0, 0)
+        self.lcd.cursor_pos = (0, 0)
         self.lcd.write_string(
             'Out: {}{}C'.format(temperature, self.DEGREE_SYMBOL))
 
     def print_inside_temperature(self, temperature):
-        self.lcd.cursor_pos(1, 0)
+        self.lcd.cursor_pos = (1, 0)
         self.lcd.write_string(
             'In: {}{}C'.format(temperature, self.DEGREE_SYMBOL))
 
