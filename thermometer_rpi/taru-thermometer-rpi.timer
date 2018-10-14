@@ -1,0 +1,11 @@
+[Unit]
+Description=Taru RPI thermometer timer
+
+[Timer]
+OnUnitActiveSec=1m
+AccuracySec=1s
+OnBootSec=2m
+
+[Install]
+WantedBy=multi-user.target
+
