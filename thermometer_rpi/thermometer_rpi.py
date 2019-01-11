@@ -25,7 +25,7 @@ if __name__ == '__main__':
     bus = smbus.SMBus(SENSOR_PORT)
     calibration_params = bme280.load_calibration_params(bus, SENSOR_ADDRESS)
 
-    data = bme280.sample(bus, SENSOR_ADDRESS, calibration_params)
+    data = bme280.sample(bus, SENSOR_ADDRESS, calibration_params, bme280.oversampling.x16)
     mqtt.publish(MQTT_TEMPERATURE_TOPIC, '{:.2f}'.format(data.temperature))
     mqtt.publish(MQTT_PRESSURE_TOPIC, '{:.2f}'.format(data.pressure * 100))
     mqtt.publish(MQTT_HUMIDITY_TOPIC, '{:.2f}'.format(data.humidity))
